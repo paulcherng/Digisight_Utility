@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<modify version="10.4.3_a45545bc0fa864b6dd457e084eb653f6e2004e05">
+    <add>
+        <annotations>
+            <annotation name="hygienic"/>
+        </annotations>
+        <type-metadata>
+            <param name="type" value="module"/>
+            <param name="fully-qualified-name" value="com.iisigroup.iip.utility.DataBuffer"/>
+        </type-metadata>
+        <memory-model-settings/>
+        <parameter-definitions>
+            <parameter default="sourceID" name="SrcID"/>
+            <parameter name="SnsrType"/>
+            <parameter default="3" name="partition"/>
+            <parameter default="1" name="replication"/>
+            <parameter default="192.168.62.249:9092" name="Broker"/>
+            <parameter name="dataType"/>
+        </parameter-definitions>
+        <dynamic-variables/>
+        <stream name="DataIn">
+            <schema>
+                <field name="data" type="capture" type-name="dataType"/>
+            </schema>
+        </stream>
+        <box name="Java" type="java">
+            <input port="1" stream="DataIn"/>
+            <output port="1" stream="out:Java_1"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.operator.jsontuple.Tuple2JSON"/>
+            <param name="EnableStatusPort" value="false"/>
+            <param name="encodeSubType" value="Map"/>
+            <param name="includeNullFields" value="true"/>
+            <param name="logLevel" value="WARN"/>
+            <param name="outputFieldName" value="JSON"/>
+            <param name="timestampAsLong" value="false"/>
+            <param name="timestampFormat" value="yyyy-MM-dd HH:mm:ss.SSSZ"/>
+            <param name="tupleField" value=""/>
+        </box>
+        <box name="Map3" type="map">
+            <input port="1" stream="out:Java_1"/>
+            <output port="1" stream="out:Map3_1"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <expressions>
+                    <include field="message">JSON</include>
+                    <include field="topic">"${SrcID}_${SnsrType}_${dataType}"</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="OutputAdapter" type="outputadapter">
+            <input port="1" stream="out:Map3_1"/>
+            <output port="1" stream="ProduceOut"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.adapter.kafka.KafkaProducer"/>
+            <param name="AdvancedConfig-col0.0" value="client.id"/>
+            <param name="AdvancedConfig-col1.0" value="${SrcID}_${SnsrType}_${dataType}"/>
+            <param name="EnableMetricsPort" value="false"/>
+            <param name="EnableStatusPort" value="false"/>
+            <param name="brokers" value="${Broker}"/>
+            <param name="closeOnException" value="false"/>
+            <param name="compressionType" value="None"/>
+            <param name="connectOnStartup" value="true"/>
+            <param name="enableCommandPort" value="false"/>
+            <param name="enablePassThroughFields" value="true"/>
+            <param name="keySerializeType" value="Custom"/>
+            <param name="logLevel" value="WARN"/>
+            <param name="serializeType" value="Custom"/>
+            <param name="synchronousSend" value="false"/>
+            <param name="userKeySerializerClass" value=""/>
+            <param name="userSerializerClass" value=""/>
+        </box>
+        <output-stream name="ProduceOut"/>
+    </add>
+</modify>

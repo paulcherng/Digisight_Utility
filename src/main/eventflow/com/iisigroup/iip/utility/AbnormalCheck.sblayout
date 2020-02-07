@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><application-layout>
+    <component name="CapabilityIn">
+        <param name="gui:x" value="-193"/>
+        <param name="gui:y" value="-173"/>
+    </component>
+    <component name="JDBCTable">
+        <param name="gui:x" value="-30"/>
+        <param name="gui:y" value="-40"/>
+        <param name="gui:width" value="80"/>
+        <param name="gui:height" value="56"/>
+    </component>
+    <component name="QueryTable">
+        <param name="gui:x" value="-30"/>
+        <param name="gui:y" value="69"/>
+        <param name="gui:width" value="80"/>
+        <param name="gui:height" value="56"/>
+    </component>
+    <component name="Map2">
+        <param name="gui:x" value="60"/>
+        <param name="gui:y" value="-173"/>
+    </component>
+    <component name="Query">
+        <param name="gui:x" value="-20"/>
+        <param name="gui:y" value="-173"/>
+    </component>
+    <component name="Query2">
+        <param name="gui:x" value="149"/>
+        <param name="gui:y" value="-173"/>
+    </component>
+    <component name="Query4">
+        <param name="gui:x" value="-104"/>
+        <param name="gui:y" value="-173"/>
+    </component>
+    <component name="OutputStream">
+        <param name="gui:x" value="209"/>
+        <param name="gui:y" value="-23"/>
+    </component>
+    <component name="RuleOut">
+        <param name="gui:x" value="235"/>
+        <param name="gui:y" value="-174"/>
+    </component>
+</application-layout>

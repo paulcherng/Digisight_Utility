@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<modify version="10.4.3_a45545bc0fa864b6dd457e084eb653f6e2004e05">
+    <add>
+        <annotations>
+            <annotation name="hygienic"/>
+        </annotations>
+        <type-metadata>
+            <param name="type" value="module"/>
+            <param name="fully-qualified-name" value="com.iisigroup.iip.utility.Logging"/>
+        </type-metadata>
+        <memory-model-settings/>
+        <parameter-definitions>
+            <parameter default="SrcID" name="SrcID"/>
+            <parameter default="none" name="SnsrType"/>
+            <parameter default="Logger" name="logPoint"/>
+            <parameter default="192.168.61.14:9092" name="Broker"/>
+            <parameter default="192.168.61.14:2181" name="Zookeeper"/>
+        </parameter-definitions>
+        <dynamic-variables/>
+        <stream name="DataIn">
+            <schema>
+                <field name="UUID" type="string"/>
+                <field name="SrcID" type="string"/>
+                <field name="SnsrID" type="string"/>
+                <field name="data" type="capture" type-name="dataType"/>
+            </schema>
+        </stream>
+        <stream name="RawDataIn">
+            <schema>
+                <field name="UUID" type="string"/>
+                <field name="data" type="capture" type-name="dataType"/>
+            </schema>
+        </stream>
+        <box name="Union" type="union">
+            <input port="1" stream="DataIn"/>
+            <input port="2" stream="RawDataIn"/>
+            <output port="1" stream="out:Union_1"/>
+            <param name="strict" value="false"/>
+        </box>
+        <box name="Split" type="split">
+            <input port="1" stream="out:Union_1"/>
+            <output port="1" stream="out:Split_1"/>
+            <output port="2" stream="PassThrough"/>
+            <param name="output-count" value="2"/>
+        </box>
+        <output-stream name="PassThrough"/>
+        <box name="Java" type="java">
+            <input port="1" stream="out:Split_1"/>
+            <output port="1" stream="out:Java_1"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.operator.jsontuple.Tuple2JSON"/>
+            <param name="EnableStatusPort" value="false"/>
+            <param name="encodeSubType" value="Map"/>
+            <param name="includeNullFields" value="false"/>
+            <param name="logLevel" value="INFO"/>
+            <param name="outputFieldName" value="Msg"/>
+            <param name="timestampAsLong" value="false"/>
+            <param name="timestampFormat" value="yyyy-MM-dd HH:mm:ss.SSSZ"/>
+            <param name="tupleField" value=""/>
+        </box>
+        <box name="Map" type="map">
+            <input port="1" stream="out:Java_1"/>
+            <output port="1" stream="out:Map_1"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <expressions>
+                    <include field="UUID">UUID</include>
+                    <include field="SrcID">if(notnull(SrcID)) then SrcID else "${SrcID}"</include>
+                    <include field="SnsrID">if(notnull(SnsrID)) then SnsrID else "${SnsrType}"</include>
+                    <include field="Node">getNodeName()</include>
+                    <include field="LogLv">"Data"</include>
+                    <include field="RcvTs">format_time(now(),"yyyy-MM-dd'T'HH:mm:ss.SSSXXX")</include>
+                    <include field="LogPt">"${logPoint}"</include>
+                    <include field="Msg">Msg</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="JavaCopy" type="java">
+            <input port="1" stream="out:Map_1"/>
+            <output port="1" stream="out:JavaCopy_1"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.operator.jsontuple.Tuple2JSON"/>
+            <param name="EnableStatusPort" value="false"/>
+            <param name="encodeSubType" value="Map"/>
+            <param name="includeNullFields" value="false"/>
+            <param name="logLevel" value="INFO"/>
+            <param name="outputFieldName" value="message"/>
+            <param name="timestampAsLong" value="false"/>
+            <param name="timestampFormat" value="yyyy-MM-dd HH:mm:ss.SSSZ"/>
+            <param name="tupleField" value=""/>
+        </box>
+        <box name="Map2" type="map">
+            <input port="1" stream="out:JavaCopy_1"/>
+            <output port="1" stream="out:Map2_1"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <expressions>
+                    <include field="topic">"RutLogQueue"</include>
+                    <include field="message">message</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="OutputAdapter" type="outputadapter">
+            <input port="1" stream="out:Map2_1"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.adapter.kafka.KafkaProducer"/>
+            <param name="AdvancedConfig-col0.0" value="client.id"/>
+            <param name="AdvancedConfig-col1.0" value="${SrcID}_${SnsrType}_${logPoint}"/>
+            <param name="EnableMetricsPort" value="false"/>
+            <param name="EnableStatusPort" value="false"/>
+            <param name="brokers" value="${Broker}"/>
+            <param name="closeOnException" value="false"/>
+            <param name="compressionType" value="None"/>
+            <param name="connectOnStartup" value="true"/>
+            <param name="enableCommandPort" value="false"/>
+            <param name="enablePassThroughFields" value="false"/>
+            <param name="keySerializeType" value="Custom"/>
+            <param name="logLevel" value="INFO"/>
+            <param name="serializeType" value="Custom"/>
+            <param name="synchronousSend" value="false"/>
+            <param name="userKeySerializerClass" value=""/>
+            <param name="userSerializerClass" value=""/>
+        </box>
+    </add>
+</modify>

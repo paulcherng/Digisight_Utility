@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><application-layout>
+    <component name="ParamIn">
+        <param name="gui:x" value="-841"/>
+        <param name="gui:y" value="141"/>
+    </component>
+    <component name="Iterate">
+        <param name="gui:x" value="-618"/>
+        <param name="gui:y" value="141"/>
+    </component>
+    <component name="Map">
+        <param name="gui:x" value="-748"/>
+        <param name="gui:y" value="141"/>
+    </component>
+    <component name="FilePathOut">
+        <param name="gui:x" value="-528"/>
+        <param name="gui:y" value="141"/>
+    </component>
+</application-layout>

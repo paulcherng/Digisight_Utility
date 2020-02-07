@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<modify version="10.4.3_a45545bc0fa864b6dd457e084eb653f6e2004e05">
+    <add>
+        <annotations>
+            <annotation name="hygienic"/>
+        </annotations>
+        <type-metadata>
+            <param name="type" value="module"/>
+            <param name="fully-qualified-name" value="com.iisigroup.iip.utility.AbnormalCheck"/>
+        </type-metadata>
+        <memory-model-settings/>
+        <parameter-definitions>
+            <parameter default="SrcID" name="SrcID"/>
+            <parameter default="SnsrType" name="SnsrType"/>
+            <parameter default="CapType" name="CapType"/>
+        </parameter-definitions>
+        <dynamic-variables/>
+        <data name="JDBCTable" type="jdbctable">
+            <param name="connection" value="IIP"/>
+        </data>
+        <data name="QueryTable" shared="true" source="input" type="querytable">
+            <param name="storage-method" value="heap"/>
+            <param name="replicated" value="false"/>
+            <table-schema>
+                <schema>
+                    <field name="UUID" type="string"/>
+                    <field name="SrcID" type="string"/>
+                    <field name="SnsrType" type="string"/>
+                    <field name="SnsrID" type="string"/>
+                    <field name="CapType" type="string"/>
+                    <field name="Rule" type="string"/>
+                    <field name="MsgType" type="string"/>
+                    <field name="FEXGroupID" type="string"/>
+                    <field name="Interval" type="int"/>
+                    <field name="Describe" type="string"/>
+                    <field name="Enable" type="string"/>
+                </schema>
+                <primary-index type="btree">
+                    <field name="SrcID"/>
+                    <field name="SnsrType"/>
+                    <field name="SnsrID"/>
+                    <field name="Rule"/>
+                </primary-index>
+            </table-schema>
+            <param name="truncate" value="false"/>
+            <preload format="csv" mode="empty"/>
+        </data>
+        <stream name="CapabilityIn">
+            <schema>
+                <field name="reloadCommand" type="capture" type-name="fieldType"/>
+            </schema>
+        </stream>
+        <box name="Query4" type="query">
+            <input port="1" stream="CapabilityIn"/>
+            <output port="1" stream="out:Query4_1"/>
+            <dataref id="querytable" name="QueryTable"/>
+            <param name="operation" value="delete"/>
+            <param name="where" value="all-rows"/>
+            <param name="write-type" value="insert"/>
+            <param name="if-write-fails" value="ignore"/>
+            <param name="no-match-mode" value="output-no-match-nothing"/>
+            <param name="order-by-direction" value="none"/>
+            <target-list>
+                <item name="input" selection="all"/>
+                <item name="old" selection="none"/>
+                <item name="new" selection="none"/>
+                <item name="current" selection="none"/>
+            </target-list>
+            <target-list name="insert">
+                <item name="input" selection="all"/>
+            </target-list>
+            <target-list name="update">
+                <item name="input" selection="all"/>
+            </target-list>
+            <target-list name="no-match">
+                <item name="input" selection="all"/>
+            </target-list>
+        </box>
+        <box name="Query" type="query">
+            <input port="1" stream="out:Query4_1"/>
+            <output port="1" stream="OutputStream"/>
+            <dataref id="jdbctable" name="JDBCTable"/>
+            <param name="sql" value="select * from IOT_RULE_CAP  where SrcID='${SrcID}' and (SnsrType='${SnsrType}' or SnsrType='*') and CapType='${CapType}' and Enable='1'"/>
+            <param name="use-callable-statements" value="false"/>
+            <param name="send-null-tuple" value="false"/>
+            <param name="jdbc-output-column" value="0"/>
+            <target-list>
+                <item name="table" selection="all"/>
+                <item name="input" selection="none"/>
+            </target-list>
+            <param name="result-set" value="query"/>
+        </box>
+        <output-stream name="OutputStream"/>
+        <box name="Map2" type="map">
+            <input port="1" stream="OutputStream"/>
+            <output port="1" stream="out:Map2_1"/>
+            <target-list>
+                <item name="input" selection="all"/>
+                <expressions>
+                    <include field="Rule">CapRule</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="Query2" type="query">
+            <input port="1" stream="out:Map2_1"/>
+            <output port="1" stream="RuleOut"/>
+            <dataref id="querytable" name="QueryTable"/>
+            <param name="operation" value="write"/>
+            <param name="where" value="primary-key"/>
+            <param name="key-field.0" value="SnsrID"/>
+            <param name="key-value.0" value="SnsrID"/>
+            <param name="key-field.1" value="Rule"/>
+            <param name="key-value.1" value="Rule"/>
+            <param name="write-type" value="insert"/>
+            <param name="if-write-fails" value="ignore"/>
+            <param name="no-match-mode" value="output-no-match-null"/>
+            <param name="order-by-direction" value="none"/>
+            <target-list>
+                <item name="input" selection="all"/>
+                <item name="old" selection="none"/>
+                <item name="new" selection="none"/>
+                <item name="current" selection="none"/>
+            </target-list>
+            <target-list name="insert">
+                <item name="input" selection="all"/>
+            </target-list>
+            <target-list name="update">
+                <item name="input" selection="all"/>
+            </target-list>
+            <target-list name="no-match">
+                <item name="input" selection="all"/>
+            </target-list>
+        </box>
+        <output-stream name="RuleOut"/>
+    </add>
+</modify>

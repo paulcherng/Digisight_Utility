@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><application-layout>
+    <component name="MSSQLdatabase">
+        <param name="gui:x" value="465"/>
+        <param name="gui:y" value="72"/>
+        <param name="gui:width" value="80"/>
+        <param name="gui:height" value="56"/>
+    </component>
+    <component name="Filter">
+        <param name="gui:x" value="615"/>
+        <param name="gui:y" value="-205"/>
+        <param name="gui:height" value="104"/>
+        <param name="gui:bends:1" value="551,-32;581,-153"/>
+    </component>
+    <component name="FilterCopy2">
+        <param name="gui:x" value="69"/>
+        <param name="gui:y" value="94"/>
+    </component>
+    <component name="Gather">
+        <param name="gui:x" value="695"/>
+        <param name="gui:y" value="-205"/>
+        <param name="gui:height" value="104"/>
+    </component>
+    <component name="MapCopy">
+        <param name="gui:x" value="155"/>
+        <param name="gui:y" value="94"/>
+    </component>
+    <component name="ReloadConfCom">
+        <param name="gui:x" value="-51"/>
+        <param name="gui:y" value="94"/>
+    </component>
+    <component name="ReloadConfiguration">
+        <param name="gui:x" value="-182"/>
+        <param name="gui:y" value="94"/>
+        <param name="gui:bends:1" value="-211,106;-209,124"/>
+    </component>
+    <component name="Split">
+        <param name="gui:x" value="340"/>
+        <param name="gui:y" value="22"/>
+        <param name="gui:height" value="78"/>
+    </component>
+    <component name="Split2">
+        <param name="gui:x" value="-279"/>
+        <param name="gui:y" value="48"/>
+        <param name="gui:height" value="78"/>
+    </component>
+    <component name="Start">
+        <param name="gui:x" value="-385"/>
+        <param name="gui:y" value="57"/>
+    </component>
+    <component name="Union4">
+        <param name="gui:x" value="260"/>
+        <param name="gui:y" value="31"/>
+        <param name="gui:bends:1" value="31,68;35,51"/>
+        <param name="gui:bends:2" value="222,124;228,71"/>
+    </component>
+    <component name="getLoggingFlag">
+        <param name="gui:x" value="475"/>
+        <param name="gui:y" value="-62"/>
+        <param name="gui:bends:1" value="436,42;454,-32"/>
+    </component>
+    <component name="OutputStream">
+        <param name="gui:x" value="615"/>
+        <param name="gui:y" value="-62"/>
+    </component>
+    <component name="ReloadConfig">
+        <param name="gui:x" value="475"/>
+        <param name="gui:y" value="167"/>
+        <param name="gui:bends:1" value="418,80;446,197"/>
+    </component>
+    <component name="flagConfigOut">
+        <param name="gui:x" value="780"/>
+        <param name="gui:y" value="-183"/>
+    </component>
+</application-layout>

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<modify version="10.4.3_a45545bc0fa864b6dd457e084eb653f6e2004e05">
+    <add>
+        <annotations>
+            <annotation name="hygienic"/>
+        </annotations>
+        <type-metadata>
+            <param name="type" value="module"/>
+            <param name="fully-qualified-name" value="com.iisigroup.iip.utility.EStransmit"/>
+        </type-metadata>
+        <memory-model-settings/>
+        <parameter-definitions>
+            <parameter default="192.168.61.50" name="ESserver"/>
+            <parameter default="testIndex001" name="index"/>
+            <parameter default="Time" name="TimeField"/>
+        </parameter-definitions>
+        <dynamic-variables/>
+        <stream name="dataIn">
+            <schema>
+                <field name="capturedData" type="capture" type-name="dataType"/>
+            </schema>
+        </stream>
+        <box name="Start" type="inputadapter">
+            <output port="1" stream="out:Start_1"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.adapter.once.Once"/>
+            <param name="OutputField" value="time"/>
+        </box>
+        <box name="Java2" type="java">
+            <input port="1" stream="dataIn"/>
+            <output port="1" stream="out:Java2_1"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.operator.jsontuple.Tuple2JSON"/>
+            <param name="EnableStatusPort" value="false"/>
+            <param name="encodeSubType" value="Map"/>
+            <param name="includeNullFields" value="false"/>
+            <param name="logLevel" value="INFO"/>
+            <param name="outputFieldName" value="PostData"/>
+            <param name="timestampAsLong" value="true"/>
+            <param name="timestampFormat" value="yyyy-MM-dd HH:mm:ss.SSSZ"/>
+            <param name="tupleField" value=""/>
+        </box>
+        <box name="Map2" type="map">
+            <input port="1" stream="out:Start_1"/>
+            <output port="1" stream="out:Map2_1"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <expressions>
+                    <include field="mappings">tuple(tuple(tuple("date" as type) as ${TimeField}) as properties)</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="Java" type="java">
+            <input port="1" stream="out:Map2_1"/>
+            <output port="1" stream="out:Java_1"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.operator.jsontuple.Tuple2JSON"/>
+            <param name="EnableStatusPort" value="false"/>
+            <param name="encodeSubType" value="Map"/>
+            <param name="includeNullFields" value="false"/>
+            <param name="logLevel" value="INFO"/>
+            <param name="outputFieldName" value="PostData"/>
+            <param name="timestampAsLong" value="false"/>
+            <param name="timestampFormat" value="yyyy-MM-dd HH:mm:ss.SSSZ"/>
+            <param name="tupleField" value=""/>
+        </box>
+        <box name="Map3" type="map">
+            <input port="1" stream="out:Java2_1"/>
+            <output port="1" stream="out:Map3_1"/>
+            <target-list>
+                <item name="input" selection="none">
+                    <include field="PostData"/>
+                </item>
+                <expressions>
+                    <include field="URL">"http://${ESserver}:9200/"+lower("${index}")+"/_doc/"</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="dataInput" type="inputadapter">
+            <input port="1" stream="out:Map3_1"/>
+            <output port="1" stream="out:dataInput_1"/>
+            <output port="2" stream="out:dataInput_2"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.adapter.webreader.WebReader"/>
+            <param name="BasicAuthEnabled" value="false"/>
+            <param name="BasicAuthPassword" value=""/>
+            <param name="BasicAuthUsername" value=""/>
+            <param name="Charset" value=""/>
+            <param name="ConnectTimeout" value="0"/>
+            <param name="EnableControlPort" value="true"/>
+            <param name="EnablePassThroughFields" value="false"/>
+            <param name="HTTPRequestTypeOption" value="POST"/>
+            <param name="IgnoreCertificateErrors" value="false"/>
+            <param name="MaintainLineSeparatorCharacters" value="false"/>
+            <param name="OutputBlankLines" value="false"/>
+            <param name="OutputNullTupleOnCompletion" value="false"/>
+            <param name="OutputTuplePerLine" value="false"/>
+            <param name="PollFrequency" value="10000"/>
+            <param name="ProcessAsFileDownload" value="false"/>
+            <param name="ProxyHost" value=""/>
+            <param name="ProxyPass" value=""/>
+            <param name="ProxyPort" value=""/>
+            <param name="ProxyUser" value=""/>
+            <param name="ReadTimeout" value="0"/>
+            <param name="Url" value=""/>
+            <param name="UseDefaultCharset" value="true"/>
+            <param name="UseProxy" value="false"/>
+            <param name="defaultHeaders-col0.0" value="Content-Type"/>
+            <param name="defaultHeaders-col1.0" value="application/json"/>
+            <param name="defaultPostData" value=""/>
+            <param name="defaultURLEncode" value="false"/>
+            <param name="defaultURLEncodePostData" value="false"/>
+            <param name="logLevel" value="INFO"/>
+            <param name="unescapeHtmlResults" value="false"/>
+        </box>
+        <box name="Map" type="map">
+            <input port="1" stream="out:Java_1"/>
+            <output port="1" stream="out:Map_1"/>
+            <target-list>
+                <item name="input" selection="none">
+                    <include field="PostData"/>
+                </item>
+                <expressions>
+                    <include field="URL">"http://${ESserver}:9200/"+lower("${index}")</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="SettingTimeField" type="inputadapter">
+            <input port="1" stream="out:Map_1"/>
+            <output port="1" stream="out:SettingTimeField_1"/>
+            <output port="2" stream="out:SettingTimeField_2"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.adapter.webreader.WebReader"/>
+            <param name="BasicAuthEnabled" value="false"/>
+            <param name="BasicAuthPassword" value=""/>
+            <param name="BasicAuthUsername" value=""/>
+            <param name="Charset" value=""/>
+            <param name="ConnectTimeout" value="0"/>
+            <param name="EnableControlPort" value="true"/>
+            <param name="EnablePassThroughFields" value="false"/>
+            <param name="HTTPRequestTypeOption" value="PUT"/>
+            <param name="IgnoreCertificateErrors" value="false"/>
+            <param name="MaintainLineSeparatorCharacters" value="false"/>
+            <param name="OutputBlankLines" value="false"/>
+            <param name="OutputNullTupleOnCompletion" value="false"/>
+            <param name="OutputTuplePerLine" value="false"/>
+            <param name="PollFrequency" value="10000"/>
+            <param name="ProcessAsFileDownload" value="false"/>
+            <param name="ProxyHost" value=""/>
+            <param name="ProxyPass" value=""/>
+            <param name="ProxyPort" value=""/>
+            <param name="ProxyUser" value=""/>
+            <param name="ReadTimeout" value="0"/>
+            <param name="Url" value=""/>
+            <param name="UseDefaultCharset" value="true"/>
+            <param name="UseProxy" value="false"/>
+            <param name="defaultHeaders-col0.0" value="Content-Type"/>
+            <param name="defaultHeaders-col1.0" value="application/json"/>
+            <param name="defaultPostData" value=""/>
+            <param name="defaultURLEncode" value="false"/>
+            <param name="defaultURLEncodePostData" value="false"/>
+            <param name="logLevel" value="INFO"/>
+            <param name="unescapeHtmlResults" value="false"/>
+        </box>
+    </add>
+</modify>

@@ -1,0 +1,667 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<modify version="10.4.3_a45545bc0fa864b6dd457e084eb653f6e2004e05">
+    <add>
+        <annotations>
+            <annotation name="hygienic"/>
+        </annotations>
+        <type-metadata>
+            <param name="type" value="module"/>
+            <param name="fully-qualified-name" value="com.iisigroup.iip.utility.LogTransmitter"/>
+        </type-metadata>
+        <memory-model-settings/>
+        <named-schemas>
+            <schema name="configurationSchema">
+                <field name="configuration" type="tuple">
+                    <schema>
+                        <field name="_ATTRIBUTES" type="list">
+                            <element-type type="tuple">
+                                <schema>
+                                    <field name="Name" type="string"/>
+                                    <field name="Value" type="string"/>
+                                </schema>
+                            </element-type>
+                        </field>
+                        <field name="appender" type="list">
+                            <element-type type="tuple">
+                                <schema>
+                                    <field name="_ATTRIBUTES" type="list">
+                                        <element-type type="tuple">
+                                            <schema>
+                                                <field name="Name" type="string"/>
+                                                <field name="Value" type="string"/>
+                                            </schema>
+                                        </element-type>
+                                    </field>
+                                    <field name="port" type="string"/>
+                                    <field name="filter" type="tuple">
+                                        <schema>
+                                            <field name="_ATTRIBUTES" type="list">
+                                                <element-type type="tuple">
+                                                    <schema>
+                                                        <field name="Name" type="string"/>
+                                                        <field name="Value" type="string"/>
+                                                    </schema>
+                                                </element-type>
+                                            </field>
+                                            <field name="level" type="string"/>
+                                            <field name="onMatch" type="string"/>
+                                            <field name="onMismatch" type="string"/>
+                                        </schema>
+                                    </field>
+                                    <field name="syslogHost" type="string"/>
+                                    <field name="facility" type="string"/>
+                                    <field name="suffixPattern" type="string"/>
+                                    <field name="charset" type="string"/>
+                                </schema>
+                            </element-type>
+                        </field>
+                        <field name="root" type="tuple">
+                            <schema>
+                                <field name="appender_ref" type="list">
+                                    <element-type type="tuple">
+                                        <schema>
+                                            <field name="_ATTRIBUTES" type="list">
+                                                <element-type type="tuple">
+                                                    <schema>
+                                                        <field name="Name" type="string"/>
+                                                        <field name="Value" type="string"/>
+                                                    </schema>
+                                                </element-type>
+                                            </field>
+                                        </schema>
+                                    </element-type>
+                                </field>
+                            </schema>
+                        </field>
+                    </schema>
+                </field>
+                <field name="appender" type="tuple">
+                    <schema>
+                        <field name="_ATTRIBUTES" type="list">
+                            <element-type type="tuple">
+                                <schema>
+                                    <field name="Name" type="string"/>
+                                    <field name="Value" type="string"/>
+                                </schema>
+                            </element-type>
+                        </field>
+                        <field name="port" type="string"/>
+                        <field name="filter" type="tuple">
+                            <schema>
+                                <field name="_ATTRIBUTES" type="list">
+                                    <element-type type="tuple">
+                                        <schema>
+                                            <field name="Name" type="string"/>
+                                            <field name="Value" type="string"/>
+                                        </schema>
+                                    </element-type>
+                                </field>
+                                <field name="level" type="string"/>
+                                <field name="onMatch" type="string"/>
+                                <field name="onMismatch" type="string"/>
+                            </schema>
+                        </field>
+                        <field name="syslogHost" type="string"/>
+                        <field name="facility" type="string"/>
+                        <field name="suffixPattern" type="string"/>
+                        <field name="charset" type="string"/>
+                    </schema>
+                </field>
+            </schema>
+        </named-schemas>
+        <parameter-definitions>
+            <parameter default="192.168.61.14:9092" name="Broker"/>
+        </parameter-definitions>
+        <dynamic-variables>
+            <dynamic-variable initial-expression="false" name="ChkResult" setter-expression="input.ChkEx" setter-stream="NotifyExChk"/>
+            <dynamic-variable initial-expression="&quot;&quot;" name="LogLvConfig" setter-expression="input.LogLvRule" setter-stream="LogLvSetting"/>
+        </dynamic-variables>
+        <data name="JDBCTable" type="jdbctable">
+            <param name="connection" value="IIP"/>
+        </data>
+        <data name="QueryTable" shared="false" source="concrete" type="querytable">
+            <param name="storage-method" value="heap"/>
+            <param name="replicated" value="false"/>
+            <table-schema>
+                <schema>
+                    <field name="UUID" type="string"/>
+                    <field name="LogLv" type="string"/>
+                    <field name="Interval" type="int"/>
+                    <field name="FEXGroupID" type="string"/>
+                    <field name="ChnlType" type="string"/>
+                    <field name="Enable" type="string"/>
+                </schema>
+                <primary-index type="btree">
+                    <field name="LogLv"/>
+                </primary-index>
+            </table-schema>
+            <param name="truncate" value="false"/>
+            <preload format="csv" mode="empty"/>
+        </data>
+        <data name="QueryTable2" shared="false" source="concrete" type="querytable">
+            <param name="storage-method" value="heap"/>
+            <param name="replicated" value="false"/>
+            <table-schema>
+                <schema>
+                    <field name="KEYWORD" type="string"/>
+                </schema>
+                <primary-index type="btree">
+                    <field name="KEYWORD"/>
+                </primary-index>
+            </table-schema>
+            <param name="truncate" value="false"/>
+            <preload format="csv" mode="empty"/>
+        </data>
+        <box name="InputAdapter" type="inputadapter">
+            <output port="1" stream="out:InputAdapter_1"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.adapter.once.Once"/>
+            <param name="OutputField" value="time"/>
+        </box>
+        <box name="SyslogConsume514" type="inputadapter">
+            <output port="1" stream="out:SyslogConsume514_1"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.adapter.syslog.SyslogInputAdapter"/>
+            <param name="addCommandPort" value="false"/>
+            <param name="addStatusPort" value="false"/>
+            <param name="connectOnStartup" value="true"/>
+            <param name="logLevel" value="INFO"/>
+            <param name="parseIncomingMessages" value="true"/>
+            <param name="udpPort" value="514"/>
+        </box>
+        <box name="SyslogConsume6514" type="inputadapter">
+            <output port="1" stream="out:SyslogConsume6514_1"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.adapter.syslog.SyslogInputAdapter"/>
+            <param name="addCommandPort" value="false"/>
+            <param name="addStatusPort" value="false"/>
+            <param name="connectOnStartup" value="true"/>
+            <param name="logLevel" value="INFO"/>
+            <param name="parseIncomingMessages" value="true"/>
+            <param name="udpPort" value="6514"/>
+        </box>
+        <box name="Split" type="split">
+            <input port="1" stream="out:InputAdapter_1"/>
+            <output port="1" stream="out:Split_1"/>
+            <output port="2" stream="out:Split_2"/>
+            <param name="output-count" value="2"/>
+        </box>
+        <box name="Union3" type="union">
+            <input port="1" stream="out:SyslogConsume6514_1"/>
+            <input port="2" stream="out:SyslogConsume514_1"/>
+            <output port="1" stream="SysLogOut"/>
+            <param name="strict" value="false"/>
+        </box>
+        <output-stream name="SysLogOut" scope="public"/>
+        <box name="Filter2Copy" type="filter">
+            <input port="1" stream="SysLogOut"/>
+            <output port="1" stream="out:Filter2Copy_1"/>
+            <param name="autogen-nomatch-port" value="false"/>
+            <param name="expression.0" value="startswith(msg,&quot;DEBUG&quot;) or startswith(msg,&quot;INFO&quot;) or startswith(msg,&quot;WARN&quot;) or startswith(msg,&quot;ERROR&quot;) or startswith(msg,&quot;FATAL&quot;)"/>
+        </box>
+        <box name="Map6" type="map">
+            <input port="1" stream="out:Split_2"/>
+            <output port="1" stream="out:Map6_1"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <expressions>
+                    <include field="command">"subscribe"</include>
+                    <include field="topic">"reloadConfig"</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="InputAdapter2" type="inputadapter">
+            <input port="1" stream="out:Map6_1"/>
+            <output port="1" stream="out:InputAdapter2_1"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.adapter.kafka.KafkaConsumer"/>
+            <param name="AdvancedConfig-col0.0" value="auto.offset.reset"/>
+            <param name="AdvancedConfig-col1.0" value="latest"/>
+            <param name="EnableMetricsPort" value="false"/>
+            <param name="EnableStatusPort" value="false"/>
+            <param name="brokers" value="${Broker}"/>
+            <param name="characterSet" value="UTF-8"/>
+            <param name="deserializerType" value="String"/>
+            <param name="enableCommandPort" value="true"/>
+            <param name="enablePassThroughFields" value="false"/>
+            <param name="keyDeserializerType" value="String"/>
+            <param name="keyOutputSchema" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;schema/&gt;&#13;&#10;"/>
+            <param name="logLevel" value="INFO"/>
+            <param name="maxFailureCount" value="5"/>
+            <param name="outputHighWaterMark" value="false"/>
+            <param name="outputLatestOffsetStatusMessage" value="false"/>
+            <param name="outputSchema" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;schema/&gt;&#13;&#10;"/>
+            <param name="performCommit" value="false"/>
+            <param name="pollWaitMS" value="100"/>
+            <param name="useDefaultcharacterSet" value="true"/>
+            <param name="userDeserializerClass" value=""/>
+            <param name="userKeyDeserializerClass" value=""/>
+        </box>
+        <box name="Map2" type="map">
+            <input port="1" stream="out:Filter2Copy_1"/>
+            <output port="1" stream="out:Map2_1"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <expressions>
+                    <include field="level">split(msg,",|,")[0]</include>
+                    <include field="app">split(split(msg,",|,")[1]," ")[2]</include>
+                    <include field="logger">split(msg,",|,")[2]</include>
+                    <include field="msg">if(notnull(split(msg,",|,")[3])) then split(msg,",|,")[3] else "unknown msg"</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="Filter2" type="filter">
+            <input port="1" stream="out:Map2_1"/>
+            <output port="1" stream="out:Filter2_1"/>
+            <param name="autogen-nomatch-port" value="false"/>
+            <param name="expression.0" value="eval(LogLvConfig,input1,bool())"/>
+        </box>
+        <box name="Filter3" type="filter">
+            <input port="1" stream="out:InputAdapter2_1"/>
+            <output port="1" stream="out:Filter3_1"/>
+            <param name="autogen-nomatch-port" value="false"/>
+            <param name="expression.0" value="message==&quot;RELOAD&quot;"/>
+        </box>
+        <box name="Map" type="map">
+            <input port="1" stream="out:Filter2_1"/>
+            <output port="1" stream="out:Map_1"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <expressions>
+                    <include field="Node">app</include>
+                    <include field="RcvTS">format_time(now(),"yyyy-MM-dd'T'HH:mm:ss.SSSXXX")</include>
+                    <include field="LogLv">level</include>
+                    <include field="LogPt">logger</include>
+                    <include field="Msg">msg</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="Union" type="union">
+            <input port="1" stream="out:Split_1"/>
+            <input port="2" stream="out:Filter3_1"/>
+            <output port="1" stream="out:Union_1"/>
+            <param name="strict" value="false"/>
+        </box>
+        <box name="Split3" type="split">
+            <input port="1" stream="out:Union_1"/>
+            <output port="1" stream="out:Split3_1"/>
+            <output port="2" stream="out:Split3_2"/>
+            <output port="3" stream="out:Split3_3"/>
+            <param name="output-count" value="3"/>
+        </box>
+        <box name="Split4" type="split">
+            <input port="1" stream="out:Map_1"/>
+            <output port="1" stream="out:Split4_1"/>
+            <output port="2" stream="out:Split4_2"/>
+            <param name="output-count" value="2"/>
+        </box>
+        <box name="Filter4" type="filter">
+            <input port="1" stream="out:Split4_2"/>
+            <output port="1" stream="out:Filter4_1"/>
+            <param name="autogen-nomatch-port" value="false"/>
+            <param name="expression.0" value="!ChkResult"/>
+        </box>
+        <box name="Map8" type="map">
+            <input port="1" stream="out:Split4_1"/>
+            <output port="1" stream="out:Map8_1"/>
+            <target-list>
+                <item name="input" selection="all"/>
+                <expressions>
+                    <include field="ChkEx">false</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="Query4" type="query">
+            <input port="1" stream="out:Split3_1"/>
+            <output port="1" stream="out:Query4_1"/>
+            <dataref id="querytable" name="QueryTable"/>
+            <param name="operation" value="delete"/>
+            <param name="where" value="all-rows"/>
+            <param name="write-type" value="insert"/>
+            <param name="if-write-fails" value="ignore"/>
+            <param name="no-match-mode" value="output-no-match-nothing"/>
+            <param name="order-by-direction" value="none"/>
+            <target-list>
+                <item name="input" selection="all"/>
+                <item name="old" selection="none"/>
+                <item name="new" selection="none"/>
+                <item name="current" selection="none"/>
+            </target-list>
+            <target-list name="insert">
+                <item name="input" selection="all"/>
+            </target-list>
+            <target-list name="update">
+                <item name="input" selection="all"/>
+            </target-list>
+            <target-list name="no-match">
+                <item name="input" selection="all"/>
+            </target-list>
+        </box>
+        <box name="Query5" type="query">
+            <input port="1" stream="out:Split3_2"/>
+            <output port="1" stream="out:Query5_1"/>
+            <dataref id="jdbctable" name="JDBCTable"/>
+            <param name="sql" value="select VALUE from SOA_BS_CONFIG where NAME='sb-config' and KEE='LogLv'"/>
+            <param name="use-callable-statements" value="false"/>
+            <param name="send-null-tuple" value="false"/>
+            <param name="jdbc-output-column" value="0"/>
+            <target-list>
+                <item name="table" selection="all"/>
+                <item name="input" selection="none"/>
+            </target-list>
+            <param name="result-set" value="query"/>
+        </box>
+        <box name="Query6" type="query">
+            <input port="1" stream="out:Split3_3"/>
+            <output port="1" stream="out:Query6_1"/>
+            <dataref id="jdbctable" name="JDBCTable"/>
+            <param name="sql" value="select * from IOT_NTFC_EX"/>
+            <param name="use-callable-statements" value="false"/>
+            <param name="send-null-tuple" value="false"/>
+            <param name="jdbc-output-column" value="0"/>
+            <target-list>
+                <item name="table" selection="all"/>
+                <item name="input" selection="none"/>
+            </target-list>
+            <param name="result-set" value="query"/>
+        </box>
+        <box name="Map7" type="map">
+            <input port="1" stream="out:Query5_1"/>
+            <output port="1" stream="LogLvSetting"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <expressions>
+                    <include field="LogLvRule">if(VALUE=='DEBUG') then 'level=="DEBUG" or level=="INFO" or level=="WARN" or level=="ERROR" or level=="FATAL"'
+else if (VALUE=='INFO') then 'level=="INFO" or level=="WARN" or level=="ERROR" or level=="FATAL"'
+else if (VALUE=='WARN') then 'level=="WARN" or level=="ERROR" or level=="FATAL"'
+else if (VALUE=='ERROR') then 'level=="ERROR" or level=="FATAL"'
+else 'level=="FATAL"'</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="Query" type="query">
+            <input port="1" stream="out:Query4_1"/>
+            <output port="1" stream="out:Query_1"/>
+            <dataref id="jdbctable" name="JDBCTable"/>
+            <param name="sql" value="select * from IOT_NTFC_SYSLOG_RULE where Enable='1'"/>
+            <param name="use-callable-statements" value="false"/>
+            <param name="send-null-tuple" value="false"/>
+            <param name="jdbc-output-column" value="0"/>
+            <target-list>
+                <item name="table" selection="all"/>
+                <item name="input" selection="none"/>
+            </target-list>
+            <param name="result-set" value="query"/>
+        </box>
+        <box name="Query7" type="query">
+            <input port="1" stream="out:Query6_1"/>
+            <dataref id="querytable" name="QueryTable2"/>
+            <param name="operation" value="write"/>
+            <param name="where" value="primary-key"/>
+            <param name="key-field.0" value="KEYWORD"/>
+            <param name="key-value.0" value="KEYWORD"/>
+            <param name="write-type" value="insert"/>
+            <param name="if-write-fails" value="ignore"/>
+            <param name="no-match-mode" value="output-no-match-null"/>
+            <param name="order-by-direction" value="none"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <item name="old" selection="none"/>
+                <item name="new" selection="none"/>
+                <item name="current" selection="none"/>
+            </target-list>
+            <target-list name="insert">
+                <item name="input" selection="all"/>
+            </target-list>
+            <target-list name="update">
+                <item name="input" selection="all"/>
+            </target-list>
+            <target-list name="no-match">
+                <item name="input" selection="all"/>
+            </target-list>
+        </box>
+        <box name="Split2" type="split">
+            <input port="1" stream="out:Filter4_1"/>
+            <output port="1" stream="out:Split2_1"/>
+            <output port="2" stream="out:Split2_2"/>
+            <param name="output-count" value="2"/>
+        </box>
+        <box name="Split5" type="split">
+            <input port="1" stream="out:Map8_1"/>
+            <output port="1" stream="out:Split5_1"/>
+            <output port="2" stream="out:Split5_2"/>
+            <param name="output-count" value="2"/>
+        </box>
+        <output-stream name="LogLvSetting"/>
+        <box name="Java" type="java">
+            <input port="1" stream="out:Split2_1"/>
+            <output port="1" stream="out:Java_1"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.operator.jsontuple.Tuple2JSON"/>
+            <param name="EnableStatusPort" value="false"/>
+            <param name="encodeSubType" value="Map"/>
+            <param name="includeNullFields" value="false"/>
+            <param name="logLevel" value="INFO"/>
+            <param name="outputFieldName" value="message"/>
+            <param name="timestampAsLong" value="false"/>
+            <param name="timestampFormat" value="yyyy-MM-dd HH:mm:ss.SSSZ"/>
+            <param name="tupleField" value=""/>
+        </box>
+        <box name="Map5" type="map">
+            <input port="1" stream="out:Split2_2"/>
+            <output port="1" stream="out:Map5_1"/>
+            <target-list>
+                <item name="input" selection="all">
+                    <remove field="Msg"/>
+                </item>
+                <expressions>
+                    <include field="Msg">tuple(Node,LogLv,LogPt,input.Msg as Describe)</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="Query2" type="query">
+            <input port="1" stream="out:Query_1"/>
+            <output port="1" stream="out:Query2_1"/>
+            <dataref id="querytable" name="QueryTable"/>
+            <param name="operation" value="write"/>
+            <param name="where" value="primary-key"/>
+            <param name="key-field.0" value="LogLv"/>
+            <param name="key-value.0" value="LogLv"/>
+            <param name="write-type" value="insert"/>
+            <param name="if-write-fails" value="force"/>
+            <param name="no-match-mode" value="output-no-match-null"/>
+            <param name="order-by-direction" value="none"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <item name="old" selection="none"/>
+                <item name="new" selection="all"/>
+                <item name="current" selection="none"/>
+            </target-list>
+            <target-list name="insert">
+                <item name="input" selection="all"/>
+            </target-list>
+            <target-list name="update">
+                <item name="input" selection="all"/>
+            </target-list>
+            <target-list name="no-match">
+                <item name="input" selection="all"/>
+            </target-list>
+        </box>
+        <box name="Query8" type="query">
+            <input port="1" stream="out:Split5_2"/>
+            <output port="1" stream="out:Query8_1"/>
+            <dataref id="querytable" name="QueryTable2"/>
+            <param name="operation" value="read"/>
+            <param name="where" value="all-rows"/>
+            <param name="write-type" value="insert"/>
+            <param name="if-write-fails" value="ignore"/>
+            <param name="no-match-mode" value="output-no-match-null"/>
+            <param name="order-by-direction" value="none"/>
+            <target-list>
+                <item name="input" selection="all"/>
+                <item name="current" selection="all"/>
+                <item name="old" selection="none"/>
+                <item name="new" selection="none"/>
+            </target-list>
+            <target-list name="insert">
+                <item name="input" selection="all"/>
+            </target-list>
+            <target-list name="update">
+                <item name="input" selection="all"/>
+            </target-list>
+            <target-list name="no-match">
+                <item name="input" selection="all"/>
+            </target-list>
+        </box>
+        <box name="Filter5" type="filter">
+            <input port="1" stream="out:Query8_1"/>
+            <output port="1" stream="out:Filter5_1"/>
+            <param name="autogen-nomatch-port" value="false"/>
+            <param name="expression.0" value="!ChkResult"/>
+        </box>
+        <box name="Map3" type="map">
+            <input port="1" stream="out:Java_1"/>
+            <output port="1" stream="out:Map3_1"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <expressions>
+                    <include field="topic">"LogQueue"</include>
+                    <include field="message">message</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="Query3" type="query">
+            <input port="1" stream="out:Map5_1"/>
+            <output port="1" stream="out:Query3_1"/>
+            <dataref id="querytable" name="QueryTable"/>
+            <param name="operation" value="read"/>
+            <param name="where" value="expression"/>
+            <param name="limit" value="1"/>
+            <param name="where-expression" value="input.LogLv=current.LogLv"/>
+            <param name="write-type" value="insert"/>
+            <param name="if-write-fails" value="ignore"/>
+            <param name="no-match-mode" value="output-no-match-null"/>
+            <param name="order-by-direction" value="none"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <item name="current" selection="none"/>
+                <item name="old" selection="none"/>
+                <item name="new" selection="none"/>
+                <expressions>
+                    <include field="Rule_ID">UUID</include>
+                    <include field="MsgContent">tuple(md5(Node+LogPt) as Hash,Msg)</include>
+                    <include field="Interval">Interval</include>
+                    <include field="FEXGroupID">FEXGroupID</include>
+                    <include field="ChnlType">ChnlType</include>
+                    <include field="timestamp">now()</include>
+                </expressions>
+            </target-list>
+            <target-list name="insert">
+                <item name="input" selection="all"/>
+            </target-list>
+            <target-list name="update">
+                <item name="input" selection="all"/>
+            </target-list>
+            <target-list name="no-match">
+                <item name="input" selection="all"/>
+            </target-list>
+        </box>
+        <box name="Filter" type="filter">
+            <input port="1" stream="out:Map3_1"/>
+            <output port="1" stream="out:Filter_1"/>
+            <param name="autogen-nomatch-port" value="false"/>
+            <param name="expression.0" value="!contains(message,&quot;INVALID_FETCH_SESSION_EPOCH&quot;)"/>
+        </box>
+        <box name="JavaCopy" type="java">
+            <input port="1" stream="out:Query3_1"/>
+            <output port="1" stream="out:JavaCopy_1"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.operator.jsontuple.Tuple2JSON"/>
+            <param name="EnableStatusPort" value="false"/>
+            <param name="encodeSubType" value="Map"/>
+            <param name="includeNullFields" value="false"/>
+            <param name="logLevel" value="INFO"/>
+            <param name="outputFieldName" value="message"/>
+            <param name="timestampAsLong" value="false"/>
+            <param name="timestampFormat" value="yyyy-MM-dd HH:mm:ss.SSSZ"/>
+            <param name="tupleField" value=""/>
+        </box>
+        <box name="Map9" type="map">
+            <input port="1" stream="out:Filter5_1"/>
+            <output port="1" stream="out:Map9_1"/>
+            <target-list>
+                <item name="input" selection="all">
+                    <replace field="ChkEx">contains(Msg,KEYWORD)</replace>
+                </item>
+            </target-list>
+        </box>
+        <box name="LogQueueProd" type="outputadapter">
+            <input port="1" stream="out:Filter_1"/>
+            <output port="1" stream="LogQueueIn"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.adapter.kafka.KafkaProducer"/>
+            <param name="AdvancedConfig-col0.0" value="client.id"/>
+            <param name="AdvancedConfig-col0.1" value="acks"/>
+            <param name="AdvancedConfig-col1.0" value="LogQueueProducer"/>
+            <param name="AdvancedConfig-col1.1" value="all"/>
+            <param name="EnableMetricsPort" value="false"/>
+            <param name="EnableStatusPort" value="false"/>
+            <param name="brokers" value="${Broker}"/>
+            <param name="closeOnException" value="false"/>
+            <param name="compressionType" value="None"/>
+            <param name="connectOnStartup" value="true"/>
+            <param name="enableCommandPort" value="false"/>
+            <param name="enablePassThroughFields" value="true"/>
+            <param name="keySerializeType" value="Custom"/>
+            <param name="logLevel" value="INFO"/>
+            <param name="serializeType" value="Custom"/>
+            <param name="synchronousSend" value="false"/>
+            <param name="userKeySerializerClass" value=""/>
+            <param name="userSerializerClass" value=""/>
+        </box>
+        <box name="Map4" type="map">
+            <input port="1" stream="out:JavaCopy_1"/>
+            <output port="1" stream="out:Map4_1"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <expressions>
+                    <include field="topic">"IIP.Notification.SysError"</include>
+                    <include field="message">message</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="Union2" type="union">
+            <input port="1" stream="out:Split5_1"/>
+            <input port="2" stream="out:Map9_1"/>
+            <output port="1" stream="NotifyExChk"/>
+            <param name="strict" value="false"/>
+        </box>
+        <output-stream name="LogQueueIn"/>
+        <output-stream name="NotifyExChk"/>
+        <box name="SysNotifyProd" type="outputadapter">
+            <input port="1" stream="out:Map4_1"/>
+            <output port="1" stream="NTFC_SysErrorIn"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.adapter.kafka.KafkaProducer"/>
+            <param name="AdvancedConfig-col0.0" value="client.id"/>
+            <param name="AdvancedConfig-col0.1" value="acks"/>
+            <param name="AdvancedConfig-col1.0" value="SysNotifProducer"/>
+            <param name="AdvancedConfig-col1.1" value="all"/>
+            <param name="EnableMetricsPort" value="false"/>
+            <param name="EnableStatusPort" value="false"/>
+            <param name="brokers" value="${Broker}"/>
+            <param name="closeOnException" value="false"/>
+            <param name="compressionType" value="None"/>
+            <param name="connectOnStartup" value="true"/>
+            <param name="enableCommandPort" value="false"/>
+            <param name="enablePassThroughFields" value="true"/>
+            <param name="keySerializeType" value="Custom"/>
+            <param name="logLevel" value="INFO"/>
+            <param name="serializeType" value="Custom"/>
+            <param name="synchronousSend" value="false"/>
+            <param name="userKeySerializerClass" value=""/>
+            <param name="userSerializerClass" value=""/>
+        </box>
+        <output-stream name="NTFC_SysErrorIn"/>
+    </add>
+</modify>

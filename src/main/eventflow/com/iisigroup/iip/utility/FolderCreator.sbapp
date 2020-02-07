@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<modify version="10.4.3_a45545bc0fa864b6dd457e084eb653f6e2004e05">
+    <add>
+        <annotations>
+            <annotation name="hygienic"/>
+        </annotations>
+        <type-metadata>
+            <param name="type" value="module"/>
+            <param name="fully-qualified-name" value="com.iisigroup.iip.utility.FolderCreator"/>
+        </type-metadata>
+        <memory-model-settings/>
+        <parameter-definitions>
+            <parameter default="SrcID" name="SrcID"/>
+        </parameter-definitions>
+        <dynamic-variables>
+            <dynamic-variable initial-expression="&quot;3&quot;" name="Hour" setter-expression="input.VALUE" setter-stream="actionHour"/>
+            <dynamic-variable initial-expression="&quot;0&quot;" name="Minute" setter-expression="input.VALUE" setter-stream="actionMinute"/>
+            <dynamic-variable initial-expression="&quot;/home/administrator/Documents&quot;" name="RootPath" setter-expression="input.RootPath" setter-stream="RootPathConfig"/>
+        </dynamic-variables>
+        <data name="JDBCTable" type="jdbctable">
+            <param name="connection" value="IIP"/>
+        </data>
+        <stream name="ReloadCommandIn">
+            <schema>
+                <field name="configField" type="capture" type-name="config"/>
+            </schema>
+        </stream>
+        <stream name="RootPathConfig" scope="public">
+            <schema>
+                <field name="RootPath" type="string"/>
+            </schema>
+        </stream>
+        <box name="Metronome2" type="metronome">
+            <output port="1" stream="out:Metronome2_1"/>
+            <param name="interval" value="60"/>
+            <param name="timestamp-field" value="time"/>
+        </box>
+        <box name="Start" type="inputadapter">
+            <output port="1" stream="out:Start_1"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.adapter.once.Once"/>
+            <param name="OutputField" value="time"/>
+        </box>
+        <box name="Split" type="split">
+            <input port="1" stream="out:Start_1"/>
+            <output port="1" stream="out:Split_1"/>
+            <output port="2" stream="out:Split_2"/>
+            <output port="3" stream="out:Split_3"/>
+            <param name="output-count" value="3"/>
+        </box>
+        <box name="Split2" type="split">
+            <input port="1" stream="ReloadCommandIn"/>
+            <output port="1" stream="out:Split2_1"/>
+            <output port="2" stream="out:Split2_2"/>
+            <output port="3" stream="out:Split2_3"/>
+            <param name="output-count" value="3"/>
+        </box>
+        <box name="Split3" type="split">
+            <input port="1" stream="out:Metronome2_1"/>
+            <output port="1" stream="out:Split3_1"/>
+            <output port="2" stream="out:Split3_2"/>
+            <param name="output-count" value="2"/>
+        </box>
+        <box name="Filter2" type="filter">
+            <input port="1" stream="out:Split3_1"/>
+            <output port="1" stream="out:Filter2_1"/>
+            <param name="autogen-nomatch-port" value="false"/>
+            <param name="expression.0" value="format_time(time,&quot;Hm&quot;)=Hour+Minute"/>
+        </box>
+        <box name="Filter2Copy" type="filter">
+            <input port="1" stream="out:Split3_2"/>
+            <output port="1" stream="out:Filter2Copy_1"/>
+            <param name="autogen-nomatch-port" value="false"/>
+            <param name="expression.0" value="format_time(time,&quot;Hm&quot;)=Hour+Minute"/>
+        </box>
+        <box name="Union3" type="union">
+            <input port="1" stream="out:Split2_1"/>
+            <input port="2" stream="out:Split_1"/>
+            <output port="1" stream="out:Union3_1"/>
+            <param name="strict" value="false"/>
+        </box>
+        <box name="Query" type="query">
+            <input port="1" stream="out:Union3_1"/>
+            <output port="1" stream="out:Query_1"/>
+            <dataref id="jdbctable" name="JDBCTable"/>
+            <param name="sql" value="select * from SOA_BS_CONFIG where Name='sb-config' and (Kee='action.hour-schedule-up' or Kee='action.minute-schedule-up')"/>
+            <param name="use-callable-statements" value="false"/>
+            <param name="send-null-tuple" value="false"/>
+            <param name="jdbc-output-column" value="0"/>
+            <target-list>
+                <item name="table" selection="all"/>
+                <item name="input" selection="none"/>
+            </target-list>
+            <param name="result-set" value="query"/>
+        </box>
+        <box name="Union" type="union">
+            <input port="1" stream="out:Split_2"/>
+            <input port="2" stream="out:Filter2_1"/>
+            <output port="1" stream="out:Union_1"/>
+            <param name="strict" value="false"/>
+        </box>
+        <box name="Union2" type="union">
+            <input port="1" stream="out:Split2_3"/>
+            <input port="2" stream="out:Filter2Copy_1"/>
+            <input port="3" stream="out:Split_3"/>
+            <output port="1" stream="out:Union2_1"/>
+            <param name="strict" value="false"/>
+        </box>
+        <box name="CreateParam" type="map">
+            <input port="1" stream="out:Union2_1"/>
+            <output port="1" stream="out:CreateParam_1"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <expressions>
+                    <include field="year">format_time(now(),"yyyy")</include>
+                    <include field="month">format_time(now(),"M")</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="Filter" type="filter">
+            <input port="1" stream="out:Query_1"/>
+            <output port="1" stream="actionHour"/>
+            <output port="2" stream="actionMinute"/>
+            <param name="autogen-nomatch-port" value="false"/>
+            <param name="expression.0" value="KEE='action.hour-schedule-up'"/>
+            <param name="expression.1" value="KEE='action.minute-schedule-up'"/>
+        </box>
+        <module-reference name="PurgeRawFile">
+            <input name="PugeCommandIn" port="1" stream="out:Union_1"/>
+            <input name="ReloadCommandIn" port="2" stream="out:Split2_2"/>
+            <output name="ExpFileList" port="1" stream="ExpFileList"/>
+            <param name="file" value="com.iisigroup.iip.utility.PurgeRawFile"/>
+            <parameter-bindings>
+                <binding name="SrcID" value="${SrcID}"/>
+            </parameter-bindings>
+        </module-reference>
+        <output-stream name="actionHour"/>
+        <output-stream name="actionMinute"/>
+        <output-stream name="ExpFileList"/>
+        <box name="CreateFolder" type="map">
+            <input port="1" stream="out:CreateParam_1"/>
+            <output port="1" stream="CreateResult"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <expressions>
+                    <include field="folderList">calljava("com.iisigroup.product.iip.utility.filePathControl.filePathControl","folderCreate",RootPath,"${SrcID}",year,month)</include>
+                </expressions>
+            </target-list>
+        </box>
+        <output-stream name="CreateResult"/>
+    </add>
+</modify>

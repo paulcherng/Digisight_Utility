@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<modify version="10.4.3_a45545bc0fa864b6dd457e084eb653f6e2004e05">
+    <add>
+        <annotations>
+            <annotation name="hygienic"/>
+        </annotations>
+        <type-metadata>
+            <param name="type" value="module"/>
+            <param name="fully-qualified-name" value="com.iisigroup.iip.utility.ReloadLogConfig"/>
+        </type-metadata>
+        <memory-model-settings/>
+        <named-schemas>
+            <schema name="appender">
+                <field name="_ATTRIBUTES" type="list">
+                    <element-type type="tuple">
+                        <schema>
+                            <field name="Name" type="string"/>
+                            <field name="Value" type="string"/>
+                        </schema>
+                    </element-type>
+                </field>
+                <field name="port" type="string"/>
+                <field name="rollingPolicy" type="tuple">
+                    <schema>
+                        <field name="_ATTRIBUTES" type="list">
+                            <element-type type="tuple">
+                                <schema>
+                                    <field name="Name" type="string"/>
+                                    <field name="Value" type="string"/>
+                                </schema>
+                            </element-type>
+                        </field>
+                        <field name="fileNamePattern" type="string"/>
+                        <field name="maxHistory" type="string"/>
+                        <field name="totalSizeCap" type="string"/>
+                    </schema>
+                </field>
+                <field name="triggeringPolicy" type="tuple">
+                    <schema>
+                        <field name="_ATTRIBUTES" type="list">
+                            <element-type type="tuple">
+                                <schema>
+                                    <field name="Name" type="string"/>
+                                    <field name="Value" type="string"/>
+                                </schema>
+                            </element-type>
+                        </field>
+                        <field name="maxFileSize" type="string"/>
+                    </schema>
+                </field>
+                <field name="encoder" type="tuple">
+                    <schema>
+                        <field name="pattern" type="string"/>
+                    </schema>
+                </field>
+                <field name="filter" type="tuple">
+                    <schema>
+                        <field name="_ATTRIBUTES" type="list">
+                            <element-type type="tuple">
+                                <schema>
+                                    <field name="Name" type="string"/>
+                                    <field name="Value" type="string"/>
+                                </schema>
+                            </element-type>
+                        </field>
+                        <field name="level" type="string"/>
+                        <field name="onMatch" type="string"/>
+                        <field name="onMismatch" type="string"/>
+                    </schema>
+                </field>
+                <field name="syslogHost" type="string"/>
+                <field name="facility" type="string"/>
+                <field name="suffixPattern" type="string"/>
+                <field name="charset" type="string"/>
+            </schema>
+            <schema name="configuration">
+                <field name="_ATTRIBUTES" type="list">
+                    <element-type type="tuple">
+                        <schema>
+                            <field name="Name" type="string"/>
+                            <field name="Value" type="string"/>
+                        </schema>
+                    </element-type>
+                </field>
+                <field name="appender" type="list">
+                    <element-type type="tuple" value="appender"/>
+                </field>
+                <field name="root" type="tuple">
+                    <schema>
+                        <field name="appender_ref" type="list">
+                            <element-type type="tuple">
+                                <schema>
+                                    <field name="_ATTRIBUTES" type="list">
+                                        <element-type type="tuple">
+                                            <schema>
+                                                <field name="Name" type="string"/>
+                                                <field name="Value" type="string"/>
+                                            </schema>
+                                        </element-type>
+                                    </field>
+                                </schema>
+                            </element-type>
+                        </field>
+                    </schema>
+                </field>
+            </schema>
+        </named-schemas>
+        <parameter-definitions>
+            <parameter default="192.168.61.19:9092" name="Broker"/>
+        </parameter-definitions>
+        <dynamic-variables/>
+        <data name="JDBCTable" type="jdbctable">
+            <param name="connection" value="IIP"/>
+        </data>
+        <box name="InputAdapter" type="inputadapter">
+            <output port="1" stream="out:InputAdapter_1"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.adapter.once.Once"/>
+            <param name="OutputField" value="time"/>
+        </box>
+        <box name="Split" type="split">
+            <input port="1" stream="out:InputAdapter_1"/>
+            <output port="1" stream="out:Split_1"/>
+            <output port="2" stream="out:Split_2"/>
+            <param name="output-count" value="2"/>
+        </box>
+        <box name="Map" type="map">
+            <input port="1" stream="out:Split_2"/>
+            <output port="1" stream="out:Map_1"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <expressions>
+                    <include field="command">"subscribe"</include>
+                    <include field="topic">"reloadConfig"</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="InputAdapter2" type="inputadapter">
+            <input port="1" stream="out:Map_1"/>
+            <output port="1" stream="out:InputAdapter2_1"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.adapter.kafka.KafkaConsumer"/>
+            <param name="AdvancedConfig-col0.0" value="auto.offset.reset"/>
+            <param name="AdvancedConfig-col1.0" value="latest"/>
+            <param name="EnableMetricsPort" value="false"/>
+            <param name="EnableStatusPort" value="false"/>
+            <param name="brokers" value="${Broker}"/>
+            <param name="characterSet" value="UTF-8"/>
+            <param name="deserializerType" value="String"/>
+            <param name="enableCommandPort" value="true"/>
+            <param name="enablePassThroughFields" value="false"/>
+            <param name="keyDeserializerType" value="String"/>
+            <param name="keyOutputSchema" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;schema/&gt;&#13;&#10;"/>
+            <param name="logLevel" value="INFO"/>
+            <param name="maxFailureCount" value="5"/>
+            <param name="outputHighWaterMark" value="false"/>
+            <param name="outputLatestOffsetStatusMessage" value="false"/>
+            <param name="outputSchema" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;schema/&gt;&#13;&#10;"/>
+            <param name="performCommit" value="false"/>
+            <param name="pollWaitMS" value="100"/>
+            <param name="useDefaultcharacterSet" value="true"/>
+            <param name="userDeserializerClass" value=""/>
+            <param name="userKeyDeserializerClass" value=""/>
+        </box>
+        <box name="Union" type="union">
+            <input port="1" stream="out:Split_1"/>
+            <input port="2" stream="out:InputAdapter2_1"/>
+            <output port="1" stream="out:Union_1"/>
+            <param name="strict" value="false"/>
+        </box>
+        <box name="Map7" type="map">
+            <input port="1" stream="out:Union_1"/>
+            <output port="1" stream="out:Map7_1"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <expressions>
+                    <include field="filePath">"logback.xml"</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="InputAdapterCopy" type="inputadapter">
+            <input port="1" stream="out:Map7_1"/>
+            <output port="1" stream="out:InputAdapterCopy_1"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.adapter.filereader.FileReader"/>
+            <param name="Charset" value=""/>
+            <param name="UseDefaultCharset" value="true"/>
+            <param name="blobData" value="false"/>
+            <param name="defaultFileName" value="logback.xml"/>
+            <param name="enableControlPort" value="true"/>
+            <param name="enableStatusPort" value="false"/>
+            <param name="extractCompressedBlobData" value="true"/>
+            <param name="fileContentsFieldName" value="FileContents"/>
+            <param name="filePattern" value="*.*"/>
+            <param name="filePatternField" value=""/>
+            <param name="filenameField" value=""/>
+            <param name="lineSeparator" value=""/>
+            <param name="logLevel" value="INFO"/>
+            <param name="oneTuplePerLine" value="false"/>
+            <param name="passThroughFields" value="false"/>
+            <param name="preserveNewLines" value="false"/>
+            <param name="readAsResource" value="true"/>
+            <param name="readDefaultFileAtStartup" value="false"/>
+            <param name="readFilesSynchronously" value="false"/>
+            <param name="recurseSubFolders" value="true"/>
+            <param name="recurseSubFoldersField" value=""/>
+            <param name="replacementDataFieldName" value=""/>
+        </box>
+        <box name="MapCopy" type="map">
+            <input port="1" stream="out:InputAdapterCopy_1"/>
+            <output port="1" stream="out:MapCopy_1"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <expressions>
+                    <include field="XML">FileContents</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="Map2Copy" type="map">
+            <input port="1" stream="out:MapCopy_1"/>
+            <output port="1" stream="out:Map2Copy_1"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <expressions>
+                    <include field="XML">replace(XML,"appender-ref","appender_ref")</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="JavaCopy" type="java">
+            <input port="1" stream="out:Map2Copy_1"/>
+            <output port="1" stream="out:JavaCopy_1"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.operator.xmltuple.XML2Tuple"/>
+            <param name="AssumeLocalTimeZone" value="false"/>
+            <param name="AttributeValuesFieldName" value="_ATTRIBUTES"/>
+            <param name="AttributeValuesSupported" value="true"/>
+            <param name="DateTimeFormat" value="yyyy-MM-dd HH:mm:ss.SSSZ"/>
+            <param name="ElementValueFieldName" value="_VALUE"/>
+            <param name="EnableStatusPort" value="false"/>
+            <param name="IncludeNullListValues" value="true"/>
+            <param name="NullListValueRepresentation" value="null"/>
+            <param name="OutputSchema" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;schema&gt;&#13;&#10;    &lt;field name=&quot;FILElogger&quot; type=&quot;tuple&quot; value=&quot;appender&quot;/&gt;&#13;&#10;    &lt;field name=&quot;Rutlogger&quot; type=&quot;tuple&quot; value=&quot;appender&quot;/&gt;&#13;&#10;    &lt;field name=&quot;logger&quot; type=&quot;tuple&quot; value=&quot;appender&quot;/&gt;&#13;&#10;    &lt;field name=&quot;configuration&quot; type=&quot;tuple&quot; value=&quot;configuration&quot;/&gt;&#13;&#10;&lt;/schema&gt;&#13;&#10;"/>
+            <param name="XMLField" value=""/>
+            <param name="logLevel" value="INFO"/>
+            <param name="namespaceFieldSeparator" value=":"/>
+            <param name="passThroughFields" value="false"/>
+            <param name="useNamespaces" value="false"/>
+            <param name="xpathExpressions-col0.0" value="/configuration/appender[@name='logger']"/>
+            <param name="xpathExpressions-col0.1" value="/configuration/appender[@name='Rutlogger']"/>
+            <param name="xpathExpressions-col0.2" value="/configuration/appender[@name='FILElogger']"/>
+            <param name="xpathExpressions-col0.3" value="/configuration"/>
+            <param name="xpathExpressions-col1.0" value="logger"/>
+            <param name="xpathExpressions-col1.1" value="Rutlogger"/>
+            <param name="xpathExpressions-col1.2" value="FILElogger"/>
+            <param name="xpathExpressions-col1.3" value="configuration"/>
+            <param name="xsltFilename" value=""/>
+        </box>
+        <box name="Query5" type="query">
+            <input port="1" stream="out:JavaCopy_1"/>
+            <output port="1" stream="out:Query5_1"/>
+            <dataref id="jdbctable" name="JDBCTable"/>
+            <param name="sql" value="select VALUE from SOA_BS_CONFIG where name='sb-config' and Kee='LogLv'"/>
+            <param name="use-callable-statements" value="false"/>
+            <param name="send-null-tuple" value="false"/>
+            <param name="jdbc-output-column" value="0"/>
+            <target-list>
+                <item name="table" selection="none"/>
+                <item name="input" selection="all"/>
+                <expressions>
+                    <include field="Level">VALUE</include>
+                </expressions>
+            </target-list>
+            <param name="result-set" value="query"/>
+        </box>
+        <box name="Query5Copy" type="query">
+            <input port="1" stream="out:Query5_1"/>
+            <output port="1" stream="OutputStream"/>
+            <dataref id="jdbctable" name="JDBCTable"/>
+            <param name="sql" value="select VALUE from SOA_BS_CONFIG where name='sb-config' and Kee='ExpDate'"/>
+            <param name="use-callable-statements" value="false"/>
+            <param name="send-null-tuple" value="false"/>
+            <param name="jdbc-output-column" value="0"/>
+            <target-list>
+                <item name="table" selection="none"/>
+                <item name="input" selection="all"/>
+                <expressions>
+                    <include field="expDate">VALUE</include>
+                </expressions>
+            </target-list>
+            <param name="result-set" value="query"/>
+        </box>
+        <output-stream name="OutputStream"/>
+        <box name="Map3Copy" type="map">
+            <input port="1" stream="OutputStream"/>
+            <output port="1" stream="out:Map3Copy_1"/>
+            <target-list>
+                <item name="input" selection="all">
+                    <replace field="FILElogger.rollingPolicy.maxHistory">expDate</replace>
+                    <replace field="logger.filter.level">Level</replace>
+                    <remove field="expDate"/>
+                    <remove field="Level"/>
+                </item>
+            </target-list>
+        </box>
+        <box name="Map5Copy" type="map">
+            <input port="1" stream="out:Map3Copy_1"/>
+            <output port="1" stream="out:Map5Copy_1"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <expressions>
+                    <include field="configuration">tuple(configuration._ATTRIBUTES as _ATTRIBUTES,list(FILElogger,logger,Rutlogger) as appender,configuration.root as root)</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="Java2" type="java">
+            <input port="1" stream="out:Map5Copy_1"/>
+            <output port="1" stream="out:Java2_1"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.operator.xmltuple.Tuple2XML"/>
+            <param name="AssumeLocalTimeZone" value="false"/>
+            <param name="AttributeFields" value=""/>
+            <param name="AttributeValuesFieldName" value="_ATTRIBUTES"/>
+            <param name="AttributeValuesSupported" value="true"/>
+            <param name="DateTimeFormat" value="yyyy-MM-dd HH:mm:ss.SSSZ"/>
+            <param name="ElementValueFieldName" value="_VALUE"/>
+            <param name="EnableStatusPort" value="false"/>
+            <param name="IncludeNullListValues" value="true"/>
+            <param name="NullListValueRepresentation" value="null"/>
+            <param name="PassThroughFields" value="false"/>
+            <param name="XMLInputFieldName" value="XMLField"/>
+            <param name="XMLOutputFieldName" value="XML"/>
+            <param name="logLevel" value="INFO"/>
+            <param name="namespaceURI" value=""/>
+            <param name="namespaceVariable" value=""/>
+            <param name="xsltFilename" value=""/>
+        </box>
+        <box name="Map6Copy" type="map">
+            <input port="1" stream="out:Java2_1"/>
+            <output port="1" stream="OutputStream2"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <expressions>
+                    <include field="XML">"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;"+replace(XML,"appender_ref","appender-ref")</include>
+                    <include field="FilePath">getResourceAbsolutePath("logback.xml")</include>
+                </expressions>
+            </target-list>
+        </box>
+        <output-stream name="OutputStream2"/>
+        <box name="Map8" type="map">
+            <input port="1" stream="OutputStream2"/>
+            <output port="1" stream="OutputStream6"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <expressions>
+                    <include field="Result">calljava("com.iisigroup.product.iip.utility.filePathControl.logbackFileHandler","reloadLogConfig",XML,FilePath)</include>
+                </expressions>
+            </target-list>
+        </box>
+        <output-stream name="OutputStream6"/>
+    </add>
+</modify>

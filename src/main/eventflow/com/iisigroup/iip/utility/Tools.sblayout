@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?><application-layout>
+    <component name="CreateFolderCommand">
+        <param name="gui:x" value="-662"/>
+        <param name="gui:y" value="67"/>
+    </component>
+    <component name="PurgeFolderCommand">
+        <param name="gui:x" value="-662"/>
+        <param name="gui:y" value="-201"/>
+    </component>
+    <component name="Module2">
+        <param name="gui:x" value="-662"/>
+        <param name="gui:y" value="-82"/>
+        <param name="gui:height" value="65"/>
+    </component>
+    <component name="JDBCTable">
+        <param name="gui:x" value="-400"/>
+        <param name="gui:y" value="-125"/>
+        <param name="gui:width" value="80"/>
+        <param name="gui:height" value="56"/>
+    </component>
+    <component name="Aggregate">
+        <param name="gui:x" value="85"/>
+        <param name="gui:y" value="-31"/>
+    </component>
+    <component name="CreateFolder">
+        <param name="gui:x" value="-390"/>
+        <param name="gui:y" value="67"/>
+    </component>
+    <component name="CreateParam">
+        <param name="gui:x" value="-525"/>
+        <param name="gui:y" value="67"/>
+    </component>
+    <component name="Filter">
+        <param name="gui:x" value="-286"/>
+        <param name="gui:y" value="-258"/>
+    </component>
+    <component name="Iterate">
+        <param name="gui:x" value="-73"/>
+        <param name="gui:y" value="-31"/>
+    </component>
+    <component name="Map">
+        <param name="gui:x" value="-390"/>
+        <param name="gui:y" value="-31"/>
+        <param name="gui:bends:1" value="-450,-161;-410,-1"/>
+    </component>
+    <component name="Map2">
+        <param name="gui:x" value="7"/>
+        <param name="gui:y" value="-31"/>
+    </component>
+    <component name="Map3">
+        <param name="gui:x" value="-286"/>
+        <param name="gui:y" value="-31"/>
+    </component>
+    <component name="Map3Copy">
+        <param name="gui:x" value="-177"/>
+        <param name="gui:y" value="-31"/>
+    </component>
+    <component name="Map4">
+        <param name="gui:x" value="-177"/>
+        <param name="gui:y" value="-170"/>
+        <param name="gui:bends:1" value="-209,-218;-191,-140"/>
+    </component>
+    <component name="Map5">
+        <param name="gui:x" value="-177"/>
+        <param name="gui:y" value="-268"/>
+    </component>
+    <component name="MapCopy">
+        <param name="gui:x" value="169"/>
+        <param name="gui:y" value="-31"/>
+    </component>
+    <component name="Query">
+        <param name="gui:x" value="-390"/>
+        <param name="gui:y" value="-258"/>
+        <param name="gui:bends:1" value="-448,-181;-438,-228"/>
+    </component>
+    <component name="Split">
+        <param name="gui:x" value="-525"/>
+        <param name="gui:y" value="-201"/>
+    </component>
+    <component name="DateFormatConfig">
+        <param name="gui:x" value="-73"/>
+        <param name="gui:y" value="-268"/>
+    </component>
+    <component name="ExpDateConfig">
+        <param name="gui:x" value="-73"/>
+        <param name="gui:y" value="-170"/>
+    </component>
+    <component name="ExpFileList">
+        <param name="gui:x" value="248"/>
+        <param name="gui:y" value="-31"/>
+    </component>
+    <component name="OutputStream">
+        <param name="gui:x" value="-286"/>
+        <param name="gui:y" value="67"/>
+    </component>
+</application-layout>

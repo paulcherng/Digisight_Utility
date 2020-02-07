@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="5 seconds">
+	<appender name="FILElogger"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<!--file>logs/logFile_%d{yyyyMMddHHmm}.log</file-->
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- daily rollover -->
+			<fileNamePattern>logs/logFile_%d{yyyyMMdd}.log</fileNamePattern>
+			<maxHistory>3</maxHistory>
+			<totalSizeCap>3GB</totalSizeCap>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-4relative [%thread] %-5level %logger{35} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+	<appender name="6514logger"
+		class="ch.qos.logback.classic.net.SyslogAppender">
+		<port>6514</port>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>DEBUG</level>
+		</filter>
+		<syslogHost>localhost</syslogHost>
+		<facility>LOCAL0</facility>
+		<suffixPattern>%level,|,%cn,|,%logger,|,%msg</suffixPattern>
+		<charset>UTF-8</charset>
+	</appender>
+	<appender name="514logger"
+		class="ch.qos.logback.classic.net.SyslogAppender">
+		<port>514</port>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>DEBUG</level>
+		</filter>
+		<syslogHost>localhost</syslogHost>
+		<facility>LOCAL0</facility>
+		<suffixPattern>%level,|,%cn,|,%logger,|,%msg</suffixPattern>
+		<charset>UTF-8</charset>
+	</appender>
+	<appender name="Rutlogger"
+		class="ch.qos.logback.classic.net.SyslogAppender">
+		<port>513</port>
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">
+			<level>INFO</level>
+			<onMatch>ACCEPT</onMatch>
+			<onMismatch>DENY</onMismatch>
+		</filter>
+		<syslogHost>localhost</syslogHost>
+		<facility>LOCAL0</facility>
+		<suffixPattern>%msg%n</suffixPattern>
+		<charset>UTF-8</charset>
+	</appender>
+	<root>
+		<appender-ref ref="FILElogger" />
+		<appender-ref ref="6514logger" />
+		<appender-ref ref="514logger" />
+		<appender-ref ref="Rutlogger" />
+	</root>
+</configuration>

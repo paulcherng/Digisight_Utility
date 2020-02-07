@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<modify version="10.4.3_a45545bc0fa864b6dd457e084eb653f6e2004e05">
+    <add>
+        <annotations>
+            <annotation name="hygienic"/>
+        </annotations>
+        <type-metadata>
+            <param name="type" value="module"/>
+            <param name="fully-qualified-name" value="com.iisigroup.iip.utility.ReloadConfiguration"/>
+        </type-metadata>
+        <memory-model-settings/>
+        <parameter-definitions>
+            <parameter default="SrcID" name="SrcID"/>
+            <parameter default="192.168.61.14:9092" name="Broker"/>
+        </parameter-definitions>
+        <dynamic-variables/>
+        <data name="MSSQLdatabase" type="jdbctable">
+            <param name="connection" value="IIP"/>
+        </data>
+        <box name="Start" type="inputadapter">
+            <output port="1" stream="out:Start_1"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.adapter.once.Once"/>
+            <param name="OutputField" value="time"/>
+        </box>
+        <box name="Split2" type="split">
+            <input port="1" stream="out:Start_1"/>
+            <output port="1" stream="out:Split2_1"/>
+            <output port="2" stream="out:Split2_2"/>
+            <param name="output-count" value="2"/>
+        </box>
+        <box name="ReloadConfiguration" type="map">
+            <input port="1" stream="out:Split2_2"/>
+            <output port="1" stream="out:ReloadConfiguration_1"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <expressions>
+                    <include field="command">"subscribe"</include>
+                    <include field="topic">"reloadConfig"</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="ReloadConfCom" type="inputadapter">
+            <input port="1" stream="out:ReloadConfiguration_1"/>
+            <output port="1" stream="out:ReloadConfCom_1"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.adapter.kafka.KafkaConsumer"/>
+            <param name="AdvancedConfig-col0.0" value="auto.offset.reset"/>
+            <param name="AdvancedConfig-col1.0" value="latest"/>
+            <param name="EnableMetricsPort" value="false"/>
+            <param name="EnableStatusPort" value="false"/>
+            <param name="brokers" value="${Broker}"/>
+            <param name="characterSet" value="UTF-8"/>
+            <param name="deserializerType" value="String"/>
+            <param name="enableCommandPort" value="true"/>
+            <param name="enablePassThroughFields" value="false"/>
+            <param name="keyDeserializerType" value="String"/>
+            <param name="keyOutputSchema" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;schema/&gt;&#13;&#10;"/>
+            <param name="logLevel" value="OFF"/>
+            <param name="maxFailureCount" value="5"/>
+            <param name="outputHighWaterMark" value="false"/>
+            <param name="outputLatestOffsetStatusMessage" value="false"/>
+            <param name="outputSchema" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;schema/&gt;&#13;&#10;"/>
+            <param name="performCommit" value="true"/>
+            <param name="pollWaitMS" value="100"/>
+            <param name="useDefaultcharacterSet" value="true"/>
+            <param name="userDeserializerClass" value=""/>
+            <param name="userKeyDeserializerClass" value=""/>
+        </box>
+        <box name="FilterCopy2" type="filter">
+            <input port="1" stream="out:ReloadConfCom_1"/>
+            <output port="1" stream="out:FilterCopy2_1"/>
+            <param name="autogen-nomatch-port" value="false"/>
+            <param name="expression.0" value="message=='RELOAD'"/>
+        </box>
+        <box name="MapCopy" type="map">
+            <input port="1" stream="out:FilterCopy2_1"/>
+            <output port="1" stream="out:MapCopy_1"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <expressions>
+                    <include field="reloadCommand">message</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="Union4" type="union">
+            <input port="1" stream="out:Split2_1"/>
+            <input port="2" stream="out:MapCopy_1"/>
+            <output port="1" stream="out:Union4_1"/>
+            <param name="strict" value="false"/>
+        </box>
+        <box name="Split" type="split">
+            <input port="1" stream="out:Union4_1"/>
+            <output port="1" stream="out:Split_1"/>
+            <output port="2" stream="ReloadConfig"/>
+            <param name="output-count" value="2"/>
+        </box>
+        <output-stream name="ReloadConfig"/>
+        <box name="getLoggingFlag" type="query">
+            <input port="1" stream="out:Split_1"/>
+            <output port="1" stream="OutputStream"/>
+            <dataref id="jdbctable" name="MSSQLdatabase"/>
+            <param name="sql" value="select * from SOA_BS_CONFIG where Name='sb-config' and kee like 'LF_%'"/>
+            <param name="use-callable-statements" value="false"/>
+            <param name="send-null-tuple" value="false"/>
+            <param name="jdbc-output-column" value="0"/>
+            <target-list>
+                <item name="table" selection="all"/>
+                <item name="input" selection="none"/>
+            </target-list>
+            <param name="result-set" value="query"/>
+        </box>
+        <output-stream name="OutputStream"/>
+        <box name="Filter" type="filter">
+            <input port="1" stream="OutputStream"/>
+            <output port="1" stream="out:Filter_1"/>
+            <output port="2" stream="out:Filter_2"/>
+            <output port="3" stream="out:Filter_3"/>
+            <output port="4" stream="out:Filter_4"/>
+            <output port="5" stream="out:Filter_5"/>
+            <output port="6" stream="out:Filter_6"/>
+            <output port="7" stream="out:Filter_7"/>
+            <param name="autogen-nomatch-port" value="false"/>
+            <param name="expression.0" value="KEE==&quot;LF_dataConnect&quot;"/>
+            <param name="expression.1" value="KEE==&quot;LF_Adapter&quot;"/>
+            <param name="expression.2" value="KEE==&quot;LF_Converter&quot;"/>
+            <param name="expression.3" value="KEE==&quot;LF_Validation&quot;"/>
+            <param name="expression.4" value="KEE==&quot;LF_dataProcess&quot;"/>
+            <param name="expression.5" value="KEE==&quot;LF_QueueIn&quot;"/>
+            <param name="expression.6" value="KEE==&quot;LF_Capability&quot;"/>
+        </box>
+        <box name="Gather" type="gather">
+            <input port="1" stream="out:Filter_1"/>
+            <input port="2" stream="out:Filter_2"/>
+            <input port="3" stream="out:Filter_3"/>
+            <input port="4" stream="out:Filter_4"/>
+            <input port="5" stream="out:Filter_5"/>
+            <input port="6" stream="out:Filter_6"/>
+            <input port="7" stream="out:Filter_7"/>
+            <output port="1" stream="flagConfigOut"/>
+            <target-list>
+                <item name="input1" selection="none">
+                    <include field="NAME"/>
+                </item>
+                <item name="input2" prefix="input2_" selection="none"/>
+                <item name="input3" prefix="input3_" selection="none"/>
+                <item name="input4" prefix="input4_" selection="none"/>
+                <item name="input5" prefix="input5_" selection="none"/>
+                <item name="input6" prefix="input6_" selection="none"/>
+                <item name="input7" prefix="input7_" selection="none"/>
+                <expressions>
+                    <include field="dataConnectFlag">input1.VALUE=="True"</include>
+                    <include field="adapterFlag">input2.VALUE=="True"</include>
+                    <include field="converterFlag">input3.VALUE=="True"</include>
+                    <include field="validationFlag">input4.VALUE=="True"</include>
+                    <include field="dataProcessFlag">input5.VALUE=="True"</include>
+                    <include field="queueInFlag">input6.VALUE=="True"</include>
+                    <include field="capabilityFlag">input7.VALUE=="True"</include>
+                </expressions>
+            </target-list>
+            <param name="key-field" value="NAME"/>
+            <param name="output-last-time-field" value="false"/>
+            <param name="emit-on-completion" value="true"/>
+            <param name="replacement-type" value="keep_first"/>
+        </box>
+        <output-stream name="flagConfigOut"/>
+    </add>
+</modify>

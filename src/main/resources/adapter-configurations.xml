@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<adapter-configurations>
+  <adapter-configuration name="webstreams">
+    <section name="webstreams">
+      <setting name="Enabled" val="true" />                
+      <setting name="Port" val="10099" />                
+      <setting name="IdleTimeoutMS" val="0" />                
+      <setting name="OutputBufferSize" val="32768" />
+      <setting name="RequestHeaderSize" val="8192" />
+      <setting name="ResponseHeaderSize" val="8192" />
+      <setting name="SendServerVersion" val="true" />
+      <setting name="SendDateHeader" val="false" />
+      <setting name="SelectorThreads" val="-1" />
+      <setting name="AcceptorThreads" val="-1" />
+      <setting name="ReuseAddress" val="true" />
+      <setting name="LingerTime" val="-1" />
+      <setting name="GZipMimeTypes" val="text/html,
+        text/plain,text/xml,application/xhtml+xml,text/css,
+        application/javascript,text/javascript,image/svg+xml" />                
+      <setting name="WebSocketAsyncWriteTimeoutMS" val="0" />
+      <setting name="WebSocketIdleTimeoutMS" val="0" />                
+      <setting name="SecurePort" val="10443" />
+    </section>
+  </adapter-configuration>        
+</adapter-configurations>  
