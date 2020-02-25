@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<modify version="10.4.3_a45545bc0fa864b6dd457e084eb653f6e2004e05">
+    <add>
+        <annotations>
+            <annotation name="hygienic"/>
+        </annotations>
+        <type-metadata>
+            <param name="type" value="module"/>
+            <param name="fully-qualified-name" value="com.iisigroup.iip.utility.ExtLog2DB"/>
+        </type-metadata>
+        <memory-model-settings/>
+        <parameter-definitions>
+            <parameter default="192.168.61.14:9092" name="Broker"/>
+            <parameter default="72" name="PurgeInterval"/>
+        </parameter-definitions>
+        <dynamic-variables>
+            <dynamic-variable initial-expression="&quot;&quot;" name="PurgeHour" setter-expression="input.PurgeHour" setter-stream="PurgeHourConfig"/>
+            <dynamic-variable initial-expression="&quot;&quot;" name="PurgeMinute" setter-expression="input.PurgeMinute" setter-stream="PurgeMinuteConfig"/>
+        </dynamic-variables>
+        <data name="JDBCTable" type="jdbctable">
+            <param name="connection" value="IIP"/>
+        </data>
+        <stream name="InputStream">
+            <schema>
+                <field name="ReloadCommand" type="capture" type-name="ReloadSign"/>
+            </schema>
+        </stream>
+        <box name="Metronome" type="metronome">
+            <output port="1" stream="out:Metronome_1"/>
+            <param name="interval" value="60"/>
+            <param name="timestamp-field" value="time"/>
+        </box>
+        <box name="Start" type="inputadapter">
+            <output port="1" stream="out:Start_1"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.adapter.once.Once"/>
+            <param name="OutputField" value="time"/>
+        </box>
+        <box name="Filter2" type="filter">
+            <input port="1" stream="out:Metronome_1"/>
+            <output port="1" stream="out:Filter2_1"/>
+            <param name="autogen-nomatch-port" value="false"/>
+            <param name="expression.0" value="format_time(time,&quot;mmss&quot;)==PurgeHour+PurgeMinute"/>
+        </box>
+        <box name="Split2" type="split">
+            <input port="1" stream="out:Start_1"/>
+            <output port="1" stream="out:Split2_1"/>
+            <output port="2" stream="out:Split2_2"/>
+            <param name="output-count" value="2"/>
+        </box>
+        <box name="Map" type="map">
+            <input port="1" stream="out:Split2_2"/>
+            <output port="1" stream="out:Map_1"/>
+            <target-list>
+                <item name="input" selection="none"/>
+                <expressions>
+                    <include field="command">"subscribe"</include>
+                    <include field="topic">"extAPI_Log"</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="Query3" type="query">
+            <input port="1" stream="out:Filter2_1"/>
+            <output port="1" stream="out:Query3_1"/>
+            <dataref id="jdbctable" name="JDBCTable"/>
+            <param name="sql" value="delete from SB_Ext_Log where Datediff(hh,RcvTime,getDate())&gt;=${PurgeInterval}"/>
+            <param name="use-callable-statements" value="false"/>
+            <param name="send-null-tuple" value="false"/>
+            <param name="jdbc-output-column" value="0"/>
+            <target-list>
+                <item name="table" selection="none"/>
+                <item name="input" selection="all"/>
+            </target-list>
+            <param name="result-set" value="query"/>
+        </box>
+        <box name="Union" type="union">
+            <input port="1" stream="InputStream"/>
+            <input port="2" stream="out:Split2_1"/>
+            <output port="1" stream="out:Union_1"/>
+            <param name="strict" value="false"/>
+        </box>
+        <box name="InputAdapter" type="inputadapter">
+            <input port="1" stream="out:Map_1"/>
+            <output port="1" stream="out:InputAdapter_1"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.adapter.kafka.KafkaConsumer"/>
+            <param name="AdvancedConfig-col0.0" value="auto.offset.reset"/>
+            <param name="AdvancedConfig-col0.1" value="group.id"/>
+            <param name="AdvancedConfig-col1.0" value="latest"/>
+            <param name="AdvancedConfig-col1.1" value="ext_log_InsertDB"/>
+            <param name="EnableMetricsPort" value="false"/>
+            <param name="EnableStatusPort" value="false"/>
+            <param name="brokers" value="${Broker}"/>
+            <param name="characterSet" value="UTF-8"/>
+            <param name="deserializerType" value="String"/>
+            <param name="enableCommandPort" value="true"/>
+            <param name="enablePassThroughFields" value="false"/>
+            <param name="keyDeserializerType" value="String"/>
+            <param name="keyOutputSchema" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;schema/&gt;&#13;&#10;"/>
+            <param name="logLevel" value="INFO"/>
+            <param name="maxFailureCount" value="5"/>
+            <param name="outputHighWaterMark" value="false"/>
+            <param name="outputLatestOffsetStatusMessage" value="false"/>
+            <param name="outputSchema" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;schema/&gt;&#13;&#10;"/>
+            <param name="performCommit" value="false"/>
+            <param name="pollWaitMS" value="100"/>
+            <param name="useDefaultcharacterSet" value="true"/>
+            <param name="userDeserializerClass" value=""/>
+            <param name="userKeyDeserializerClass" value=""/>
+        </box>
+        <box name="Query2" type="query">
+            <input port="1" stream="out:Union_1"/>
+            <output port="1" stream="out:Query2_1"/>
+            <dataref id="jdbctable" name="JDBCTable"/>
+            <param name="sql" value="select * from SOA_BS_CONFIG where name='sb-config'"/>
+            <param name="use-callable-statements" value="false"/>
+            <param name="send-null-tuple" value="false"/>
+            <param name="jdbc-output-column" value="0"/>
+            <target-list>
+                <item name="table" selection="all"/>
+                <item name="input" selection="none"/>
+            </target-list>
+            <param name="result-set" value="query"/>
+        </box>
+        <box name="Filter" type="filter">
+            <input port="1" stream="out:Query2_1"/>
+            <output port="1" stream="out:Filter_1"/>
+            <output port="2" stream="out:Filter_2"/>
+            <param name="autogen-nomatch-port" value="false"/>
+            <param name="expression.0" value="KEE='action.hour-schedule-up'"/>
+            <param name="expression.1" value="KEE='action.minute-schedule-up'"/>
+        </box>
+        <box name="Java" type="java">
+            <input port="1" stream="out:InputAdapter_1"/>
+            <output port="1" stream="out:Java_1"/>
+            <param name="start:state" value="true"/>
+            <param name="javaclass" value="com.streambase.sb.operator.jsontuple.JSON2Tuple"/>
+            <param name="enableLooseParsing" value="false"/>
+            <param name="enablePassThroughFields" value="true"/>
+            <param name="enableStatusPort" value="false"/>
+            <param name="jsonFieldName" value="message"/>
+            <param name="logLevel" value="INFO"/>
+            <param name="outputSchema" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;schema&gt;&#13;&#10;    &lt;field name=&quot;Name&quot; type=&quot;string&quot;/&gt;&#13;&#10;    &lt;field name=&quot;SB_ResponseId&quot; type=&quot;string&quot;/&gt;&#13;&#10;    &lt;field name=&quot;LogPoint&quot; type=&quot;string&quot;/&gt;&#13;&#10;    &lt;field name=&quot;RcvTime&quot; type=&quot;timestamp&quot;/&gt;&#13;&#10;    &lt;field name=&quot;DataContent&quot; type=&quot;string&quot;/&gt;&#13;&#10;&lt;/schema&gt;&#13;&#10;"/>
+            <param name="passThroughFieldsFieldName" value="PassThroughFields"/>
+            <param name="timestampFormat" value="yyyy-MM-dd HH:mm:ss.SSSZ"/>
+        </box>
+        <box name="Map2" type="map">
+            <input port="1" stream="out:Java_1"/>
+            <output port="1" stream="out:Map2_1"/>
+            <target-list>
+                <item name="input" selection="all"/>
+                <expressions>
+                    <include field="UUID">uuid()</include>
+                    <include field="RecTime">now()</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="Map3" type="map">
+            <input port="1" stream="out:Filter_2"/>
+            <output port="1" stream="PurgeMinuteConfig"/>
+            <target-list>
+                <item name="input" selection="all"/>
+                <expressions>
+                    <include field="PurgeMinute">VALUE</include>
+                </expressions>
+            </target-list>
+        </box>
+        <box name="MapCopy" type="map">
+            <input port="1" stream="out:Filter_1"/>
+            <output port="1" stream="PurgeHourConfig"/>
+            <target-list>
+                <item name="input" selection="all"/>
+                <expressions>
+                    <include field="PurgeHour">VALUE</include>
+                </expressions>
+            </target-list>
+        </box>
+        <output-stream name="PurgeHourConfig"/>
+        <output-stream name="PurgeMinuteConfig"/>
+        <box name="Query" type="query">
+            <input port="1" stream="out:Map2_1"/>
+            <output port="1" stream="out:Query_1"/>
+            <dataref id="jdbctable" name="JDBCTable"/>
+            <param name="sql" value="insert into SB_Ext_Log(UUID,Name,SB_ResponseId,LogPoint,RcvTime,RecTime,DataContent) values({UUID},{Name},{SB_ResponseId},{LogPoint},{RcvTime},{RecTime},{DataContent})"/>
+            <param name="use-callable-statements" value="false"/>
+            <param name="send-null-tuple" value="false"/>
+            <param name="jdbc-output-column" value="0"/>
+            <target-list>
+                <item name="table" selection="none"/>
+                <item name="input" selection="all"/>
+            </target-list>
+            <param name="result-set" value="query"/>
+        </box>
+    </add>
+</modify>

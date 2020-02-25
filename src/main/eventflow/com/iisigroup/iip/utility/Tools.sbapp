@@ -30,6 +30,12 @@
                 <field name="SrcID" type="string"/>
             </schema>
         </stream>
+        <module-reference name="Module">
+            <param name="file" value="com.iisigroup.iip.utility.ExtLog2DB"/>
+            <parameter-bindings>
+                <binding name="Broker" value="${Broker}"/>
+            </parameter-bindings>
+        </module-reference>
         <module-reference name="Module2">
             <output name="LogLvSetting" port="1" stream="out:Module2_1"/>
             <param name="file" value="com.iisigroup.iip.utility.LogTransmitter"/>

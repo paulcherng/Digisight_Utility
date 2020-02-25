@@ -48,17 +48,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.tibco.ep.sb.adapter</groupId>
-			<artifactId>terr</artifactId>
-			<version>10.4.3</version>
-		</dependency>
-		<dependency>
-			<groupId>com.tibco.ep.sb.adapter</groupId>
 			<artifactId>kafka</artifactId>
-			<version>10.4.3</version>
-		</dependency>
-		<dependency>
-			<groupId>com.tibco.ep.sb.adapter</groupId>
-			<artifactId>feedsim</artifactId>
 			<version>10.4.3</version>
 		</dependency>
 		<dependency>

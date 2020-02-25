@@ -7,6 +7,10 @@
         <param name="gui:x" value="-662"/>
         <param name="gui:y" value="-201"/>
     </component>
+    <component name="Module">
+        <param name="gui:x" value="-109"/>
+        <param name="gui:y" value="96"/>
+    </component>
     <component name="Module2">
         <param name="gui:x" value="-662"/>
         <param name="gui:y" value="-82"/>
